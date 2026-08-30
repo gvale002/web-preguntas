@@ -32,14 +32,14 @@ function sendJson(res, status, data) {
 function readJson(req) {
   return new Promise((resolve, reject) => {
     let body='';
-    req.on('data', c => { body += c; if (body.length > 1_000_000) req.destroy(); });
+    req.on('data', c => { body += c; if (body.length > 8_000_000) req.destroy(); });
     req.on('end', () => { try { resolve(body ? JSON.parse(body) : {}); } catch (e) { reject(e); } });
     req.on('error', reject);
   });
 }
 function safeQuizForPlayer(q) {
   if (!q) return null;
-  return { id:q.id, type:q.type, text:q.text, options:q.options || [], duration:q.duration || 20 };
+  return { id:q.id, type:q.type, text:q.text, options:q.options || [], duration:q.duration || 20, image:q.image || '' };
 }
 function randomCode() {
   for (let i=0;i<20;i++) {
@@ -169,7 +169,7 @@ const server = http.createServer(async (req,res)=>{
   const rawPath = decodeURIComponent(u.pathname);
   const p = rawPath.length > 1 ? rawPath.replace(/\/+$/, '') : rawPath;
   try {
-    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.6.4'});
+    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.7.0'});
     if (req.method === 'GET' && p === '/api/quizzes') return sendJson(res,200,{quizzes:loadQuizzes()});
     if (req.method === 'POST' && p === '/api/quizzes') {
       const body = await readJson(req); const quizzes = loadQuizzes();

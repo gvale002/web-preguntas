@@ -39,8 +39,13 @@ Para que el QR funcione con móviles, el servidor debe ser accesible desde esos 
 Los cuestionarios se guardan en `data/quizzes.json`. Las partidas activas se mantienen en memoria; al reiniciar el servidor, las salas activas se cierran, pero los cuestionarios permanecen mientras el almacenamiento del despliegue sea persistente.
 
 
-## Cambios 1.6.4
+## Cambios 1.7.0
 - Pantalla del presentador simplificada.
 - Logo PNG original `public/assets/lOGO Iotek Latam.png` sobre el QR, sin fondo CSS.
 - Eliminado el boton Música ON/OFF de la barra del presentador.
 - Boton Administración ubicado a la izquierda de Iniciar primera pregunta.
+
+
+## v1.7.0
+- Imagen opcional por pregunta desde Administración (PNG/JPG/WEBP).
+- La imagen se guarda con el cuestionario y se muestra a la izquierda de la pregunta en el modo presentador.
