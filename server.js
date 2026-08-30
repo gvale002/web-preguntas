@@ -39,7 +39,7 @@ function readJson(req) {
 }
 function safeQuizForPlayer(q) {
   if (!q) return null;
-  return { id:q.id, type:q.type, text:q.text, options:q.options || [], duration:q.duration || 20, image:q.image || '' };
+  return { id:q.id, type:q.type, text:q.text, options:q.options || [], duration:q.duration || 20, image:q.image || '', layout:q.layout || {textSize:42,imageSize:34,answersPosition:'bottom'} };
 }
 function randomCode() {
   for (let i=0;i<20;i++) {
@@ -169,7 +169,7 @@ const server = http.createServer(async (req,res)=>{
   const rawPath = decodeURIComponent(u.pathname);
   const p = rawPath.length > 1 ? rawPath.replace(/\/+$/, '') : rawPath;
   try {
-    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.7.0'});
+    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.8.0'});
     if (req.method === 'GET' && p === '/api/quizzes') return sendJson(res,200,{quizzes:loadQuizzes()});
     if (req.method === 'POST' && p === '/api/quizzes') {
       const body = await readJson(req); const quizzes = loadQuizzes();
@@ -230,6 +230,7 @@ const server = http.createServer(async (req,res)=>{
     }
     if (req.method === 'GET' && (p==='/'||p==='/admin')) return serveFile(res,path.join(PUBLIC,'admin.html'));
     if (req.method === 'GET' && p==='/presenter') return serveFile(res,path.join(PUBLIC,'presenter.html'));
+    if (req.method === 'GET' && p==='/preview') return serveFile(res,path.join(PUBLIC,'preview.html'));
     if (req.method === 'GET' && p==='/play') return serveFile(res,path.join(PUBLIC,'player.html'));
     if (req.method === 'GET') return serveFile(res,path.join(PUBLIC,p.replace(/^\//,'')));
     return sendJson(res,404,{error:'not found'});
