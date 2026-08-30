@@ -1,3 +1,40 @@
 {
-  "quizzes": []
+  "quizzes": [
+    {
+      "title": "Prueba",
+      "questions": [
+        {
+          "type": "single",
+          "text": "2+2",
+          "options": [
+            "3",
+            "4"
+          ],
+          "correct": 1,
+          "duration": 5,
+          "id": "2845f91b9e5325d8a65e4a04"
+        }
+      ],
+      "id": "012452e59af5f556e723da9a",
+      "updatedAt": "2026-08-30T20:04:14.469Z"
+    },
+    {
+      "title": "Prueba",
+      "questions": [
+        {
+          "type": "single",
+          "text": "2+2",
+          "options": [
+            "3",
+            "4"
+          ],
+          "correct": 1,
+          "duration": 5,
+          "id": "84a6e34a3750c5bde1dd737f"
+        }
+      ],
+      "id": "0939423730dc57953067744d",
+      "updatedAt": "2026-08-30T20:05:04.105Z"
+    }
+  ]
 }

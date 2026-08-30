@@ -63,6 +63,19 @@ function isCorrect(question, answer) {
   }
   return false;
 }
+function formatCorrectAnswer(q) {
+  if (!q) return '';
+  if (q.type === 'single' || q.type === 'truefalse') {
+    const i = Number(q.correct);
+    return Number.isInteger(i) && q.options?.[i] != null ? `${String.fromCharCode(65+i)} · ${q.options[i]}` : String(q.correct ?? '');
+  }
+  if (q.type === 'multiple') {
+    const ids = Array.isArray(q.correct) ? q.correct : [];
+    return ids.map(v => { const i=Number(v); return Number.isInteger(i) && q.options?.[i] != null ? `${String.fromCharCode(65+i)} · ${q.options[i]}` : String(v); }).join(' / ');
+  }
+  if (q.type === 'text') return (Array.isArray(q.correct) ? q.correct : [q.correct]).filter(Boolean).join(' / ');
+  return String(q.correct ?? '');
+}
 function publicSession(session, playerId=null) {
   const q = session.quiz.questions[session.currentQuestion] || null;
   const players = [...session.players.values()].map(p => ({ id:p.id, name:p.name, score:p.score }));
@@ -71,6 +84,7 @@ function publicSession(session, playerId=null) {
   const remainingMs = session.questionEndsAt ? Math.max(0, session.questionEndsAt-now) : 0;
   const result = session.state === 'result' && q ? {
     correct: q.correct,
+    correctDisplay: formatCorrectAnswer(q),
     winner: session.questionWinner,
     counts: session.resultCounts || {},
     questionIndex: session.currentQuestion
@@ -155,7 +169,7 @@ const server = http.createServer(async (req,res)=>{
   const rawPath = u.pathname;
   const p = rawPath.length > 1 ? rawPath.replace(/\/+$/, '') : rawPath;
   try {
-    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'web-preguntas',version:'1.1.0'});
+    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.3.0'});
     if (req.method === 'GET' && p === '/api/quizzes') return sendJson(res,200,{quizzes:loadQuizzes()});
     if (req.method === 'POST' && p === '/api/quizzes') {
       const body = await readJson(req); const quizzes = loadQuizzes();
@@ -221,4 +235,4 @@ const server = http.createServer(async (req,res)=>{
     return sendJson(res,404,{error:'not found'});
   } catch(e) { console.error(e); return sendJson(res,500,{error:'Error interno',detail:String(e.message||e)}); }
 });
-server.listen(PORT,HOST,()=>console.log(`Web Preguntas activa en http://localhost:${PORT}`));
+server.listen(PORT,HOST,()=>console.log(`G IOTK activa en http://localhost:${PORT}`));
