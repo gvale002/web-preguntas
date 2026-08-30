@@ -13,3 +13,29 @@
 /* v1.6.2 requested layout-only changes */
 .connected-count{margin:0;text-align:center}
 @media(max-width:800px){.presenter-quiz-badge{position:static;transform:none;margin-left:auto}}
+
+/* v1.6.3 questionnaire badge alignment refinement */
+.presenter-quiz-badge{
+  left:0;
+  transform:none;
+  margin-left:0;
+  width:min(760px,calc(100% - 24px));
+  max-width:none;
+  text-align:left;
+  font-size:clamp(18px,2.4vw,28px);
+  padding:10px 16px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+@media(max-width:800px){
+  .presenter-quiz-badge{
+    position:absolute;
+    left:0;
+    transform:none;
+    width:calc(100% - 14px);
+    max-width:none;
+    text-align:left;
+    font-size:18px;
+  }
+}
