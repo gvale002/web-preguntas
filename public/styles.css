@@ -44,3 +44,28 @@
 .admin-actions{flex-wrap:nowrap;gap:7px}.icon-btn{width:42px;height:42px;flex:0 0 42px;border:0;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;background:#29365f;color:#fff;font-size:20px;font-weight:900;cursor:pointer}.icon-btn:hover{filter:brightness(1.12)}.music-toggle.is-off{opacity:.58}.danger-icon,.quiz-delete{min-width:38px;width:38px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:17px}.volume-control.compact{gap:5px;padding:6px 8px}.volume-control.compact input{width:72px}.volume-control.compact span#volumeValue{min-width:36px;font-size:11px}.volume-icon{font-size:14px}.question-layout-controls{grid-template-columns:minmax(160px,1fr) minmax(210px,1fr) minmax(160px,1fr) minmax(210px,1fr) auto}
 @media(max-width:1100px){.admin-actions{flex-wrap:wrap}.question-layout-controls{grid-template-columns:1fr 1fr}}
 @media(max-width:800px){.admin-actions{flex-wrap:wrap}.volume-control.compact{width:auto}.volume-control.compact input{width:90px}.question-layout-controls{grid-template-columns:1fr}}
+
+/* v1.8.4: persistent mobile answer confirmation and compact single-column mobile layout */
+.sent-confirmation{font-weight:900;border:1px solid #35dcb0;background:#123f35;color:#d8fff3}
+@media(max-width:800px){
+  .player-brand{margin-bottom:8px;gap:8px}
+  .player-brand .altronics-logo{width:128px;max-height:44px}
+  .player-brand .brand{font-size:20px}
+  #screen.player-question-active{margin:0 auto;padding:10px 12px;max-width:560px}
+  #screen.player-question-active .badge{margin-bottom:2px;padding:4px 8px}
+  #screen.player-question-active h2{font-size:clamp(18px,5vw,24px);line-height:1.08;margin:6px 0 8px}
+  #screen.player-question-active .timer{height:8px;margin-bottom:6px}
+  #screen.player-question-active .answers{grid-template-columns:1fr;gap:6px;margin-top:8px}
+  #screen.player-question-active .answer{min-height:52px;padding:7px 9px;border-radius:13px;font-size:clamp(14px,4vw,18px);line-height:1.08}
+  #screen.player-question-active #send{margin-top:8px!important;padding:10px 12px}
+  #screen.player-question-active #textAns{margin-top:8px!important}
+  #screen.player-question-active .notice{margin:8px 0 0;padding:9px 10px}
+}
+@media(max-width:390px),(max-height:700px) and (max-width:800px){
+  .wrap{padding:8px 10px}
+  .player-brand{margin-bottom:5px}
+  .player-brand .altronics-logo{width:112px;max-height:38px}
+  #screen.player-question-active{padding:8px 10px}
+  #screen.player-question-active h2{font-size:18px;margin:4px 0 6px}
+  #screen.player-question-active .answer{min-height:46px;padding:6px 7px;font-size:14px}
+}

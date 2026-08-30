@@ -62,7 +62,7 @@ Los cuestionarios se guardan en `data/quizzes.json`. Las partidas activas se man
 - Colores consistentes por alternativa en jugador, presentador y vista previa: A rojo, B azul, C amarillo, D verde.
 
 
-## Cambios 1.8.2
+## Cambios 1.8.4
 - Barra superior de Administración compactada.
 - Música ON/OFF reemplazada por icono.
 - Control de volumen reducido.
