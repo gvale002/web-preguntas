@@ -68,3 +68,45 @@ Los cuestionarios se guardan en `data/quizzes.json`. Las partidas activas se man
 - Control de volumen reducido.
 - Botones Eliminar reemplazados por iconos.
 - Nuevo control por pregunta para el espacio bajo el nombre del cuestionario (0–80 px), aplicado a presentador y vista previa.
+
+## Cambios 1.9.0 - Inicio de sesión y usuarios
+- Nueva página `/login` con acceso mediante Google, Facebook, Instagram y LinkedIn.
+- Administración y APIs de cuestionarios protegidas por sesión.
+- Los jugadores siguen entrando por `/play` únicamente con código y apodo; no requieren cuenta.
+- Nuevo botón `Usuarios` al lado de `Modo juego` para cuentas cuyo correo termina en `@altronics.cl`.
+- Nueva página `/users` con listado de usuarios y eliminación. Al eliminar un usuario también se invalidan sus sesiones activas.
+- Cierre de sesión desde Administración y Usuarios.
+- G IOTK no recibe ni almacena contraseñas de los proveedores; usa OAuth 2.0 / OpenID Connect.
+
+### Variables OAuth en Render
+Define `PUBLIC_BASE_URL` con la URL pública exacta, por ejemplo:
+
+`PUBLIC_BASE_URL=https://web-preguntas.onrender.com`
+
+Google:
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- Callback: `https://TU-DOMINIO/auth/callback/google`
+
+Facebook:
+- `FACEBOOK_CLIENT_ID`
+- `FACEBOOK_CLIENT_SECRET`
+- Callback: `https://TU-DOMINIO/auth/callback/facebook`
+
+LinkedIn:
+- `LINKEDIN_CLIENT_ID`
+- `LINKEDIN_CLIENT_SECRET`
+- Callback: `https://TU-DOMINIO/auth/callback/linkedin`
+- Producto requerido: Sign in with LinkedIn using OpenID Connect (`openid profile email`).
+
+Instagram:
+- `INSTAGRAM_CLIENT_ID`
+- `INSTAGRAM_CLIENT_SECRET`
+- Callback: `https://TU-DOMINIO/auth/callback/instagram`
+- Opcionales para adaptar cambios de Meta: `INSTAGRAM_AUTH_URL`, `INSTAGRAM_TOKEN_URL`, `INSTAGRAM_USERINFO_URL`, `INSTAGRAM_SCOPE`.
+- La API actual de Instagram Login está orientada a cuentas profesionales/eligibles y normalmente no entrega correo electrónico. Por ello una cuenta que entre solo por Instagram no obtiene privilegios de administración de usuarios por dominio.
+
+Facebook también permite sobrescribir `FACEBOOK_AUTH_URL`, `FACEBOOK_TOKEN_URL` y `FACEBOOK_USERINFO_URL` si Meta cambia la versión de Graph API.
+
+### Persistencia
+Los usuarios se guardan en `data/users.json`. En Render, para conservar usuarios y cuestionarios entre recreaciones/redeploys del contenedor, configura almacenamiento persistente o migra estos datos a una base de datos.

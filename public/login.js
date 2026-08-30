@@ -1,0 +1,4 @@
+const qs=new URLSearchParams(location.search),err=qs.get('error'),box=document.querySelector('#loginError');if(err){box.textContent=err;box.classList.remove('hidden');}
+const names={google:['Google','G'],facebook:['Facebook','f'],instagram:['Instagram','◎'],linkedin:['LinkedIn','in']};
+fetch('/api/auth/me').then(r=>r.json()).then(x=>{if(x.user)location.replace('/admin');});
+fetch('/api/auth/providers').then(r=>r.json()).then(({providers})=>{document.querySelector('#providers').innerHTML=Object.entries(names).map(([key,[label,icon]])=>{const ready=providers?.[key]?.configured;return `<a class="social-login ${key} ${ready?'':'disabled'}" href="${ready?`/auth/login/${key}`:'#'}" ${ready?'':`aria-disabled="true" title="Configura las credenciales OAuth de ${label} en Render"`}><span class="social-icon">${icon}</span><span>Continuar con ${label}</span>${ready?'':'<small>No configurado</small>'}</a>`}).join('');});
