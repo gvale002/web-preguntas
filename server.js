@@ -169,7 +169,7 @@ const server = http.createServer(async (req,res)=>{
   const rawPath = decodeURIComponent(u.pathname);
   const p = rawPath.length > 1 ? rawPath.replace(/\/+$/, '') : rawPath;
   try {
-    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.8.0'});
+    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.8.1'});
     if (req.method === 'GET' && p === '/api/quizzes') return sendJson(res,200,{quizzes:loadQuizzes()});
     if (req.method === 'POST' && p === '/api/quizzes') {
       const body = await readJson(req); const quizzes = loadQuizzes();

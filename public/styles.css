@@ -30,3 +30,12 @@
 @media(max-height:800px) and (min-width:801px){.presenter-top{margin-bottom:10px}.question-active .question-media{height:min(48vh,390px)}.question-active .question-title{font-size:min(var(--q-font,42px),48px)!important}.question-active .answer{min-height:54px;padding:9px 12px}.question-active .timer-number{font-size:30px;margin:5px 0}.question-footer{margin-top:6px}}
 @media(max-width:1000px){.question-layout-controls{grid-template-columns:1fr 1fr}.question-active .answers-row{grid-template-columns:1fr 1fr}.question-active .answers-right{grid-template-columns:1fr}.question-active .answers-right .answers{grid-template-columns:1fr 1fr}}
 @media(max-width:800px){.question-layout-controls{grid-template-columns:1fr}.question-active .question-stage.has-image{grid-template-columns:1fr}.question-active .question-media{height:auto;max-height:240px}.question-active .question-media img{max-height:240px}.question-footer{flex-direction:column}.question-active .answers-row,.question-active .answers-right .answers{grid-template-columns:1fr}}
+
+
+/* v1.8.1: consistent option colors for faster identification */
+.answer.option-a{background:#d9363e;color:#fff}
+.answer.option-b{background:#2474d8;color:#fff}
+.answer.option-c{background:#e3b51b;color:#171717}
+.answer.option-d{background:#279653;color:#fff}
+.answer.option-a.selected,.answer.option-b.selected,.answer.option-c.selected,.answer.option-d.selected{outline:4px solid #fff;outline-offset:2px}
+.answer.option-a:disabled,.answer.option-b:disabled,.answer.option-c:disabled,.answer.option-d:disabled{opacity:.72}

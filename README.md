@@ -50,9 +50,13 @@ Los cuestionarios se guardan en `data/quizzes.json`. Las partidas activas se man
 - Imagen opcional por pregunta desde Administración (PNG/JPG/WEBP).
 - La imagen se guarda con el cuestionario y se muestra a la izquierda de la pregunta en el modo presentador.
 
-## Cambios 1.8.0
+## Cambios 1.8.1
 - Vista previa de cada pregunta desde Administración en una pestaña nueva, sin iniciar una partida.
 - Control por pregunta del tamaño del texto (24–64 px).
 - Control por pregunta de la ubicación de respuestas: 2 columnas debajo, una fila debajo o a la derecha.
 - Control por pregunta del tamaño de la imagen (20–48% del ancho del área de pregunta).
 - Modo presentador ampliado y compactado para priorizar que las respuestas permanezcan visibles sin scroll en pantallas de presentación habituales.
+
+
+## Cambios 1.8.1
+- Colores consistentes por alternativa en jugador, presentador y vista previa: A rojo, B azul, C amarillo, D verde.
