@@ -166,10 +166,10 @@ function serveFile(res, file) {
 
 const server = http.createServer(async (req,res)=>{
   const u = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const rawPath = u.pathname;
+  const rawPath = decodeURIComponent(u.pathname);
   const p = rawPath.length > 1 ? rawPath.replace(/\/+$/, '') : rawPath;
   try {
-    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.4.0'});
+    if (req.method === 'GET' && p === '/health') return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.5.0'});
     if (req.method === 'GET' && p === '/api/quizzes') return sendJson(res,200,{quizzes:loadQuizzes()});
     if (req.method === 'POST' && p === '/api/quizzes') {
       const body = await readJson(req); const quizzes = loadQuizzes();

@@ -1,7 +1,7 @@
 let quizzes=[], current={id:null,title:'Nuevo cuestionario',questions:[]};
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let musicEnabled=localStorage.getItem('giotk-music')!=='off';
-let musicVolume=Math.max(.8,Math.min(2.5,Number(localStorage.getItem('giotk-volume')||1.8)));
+let musicVolume=Math.max(1,Math.min(4,Number(localStorage.getItem('giotk-volume')||3)));
 let previewCtx=null;
 function updateMusicControls(){
   $('#musicAdmin').textContent=`♫ Música: ${musicEnabled?'ON':'OFF'}`;
@@ -13,11 +13,11 @@ function previewMusic(){
   previewCtx=previewCtx||new (window.AudioContext||window.webkitAudioContext)();
   if(previewCtx.state==='suspended')previewCtx.resume().catch(()=>{});
   const now=previewCtx.currentTime;
-  [261.63,329.63,392].forEach((f,i)=>{const o=previewCtx.createOscillator(),g=previewCtx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.035*musicVolume,now+i*.07);g.gain.exponentialRampToValueAtTime(.0001,now+.34+i*.07);o.connect(g).connect(previewCtx.destination);o.start(now+i*.07);o.stop(now+.38+i*.07);});
+  [261.63,329.63,392].forEach((f,i)=>{const o=previewCtx.createOscillator(),g=previewCtx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.09*musicVolume,now+i*.07);g.gain.exponentialRampToValueAtTime(.0001,now+.34+i*.07);o.connect(g).connect(previewCtx.destination);o.start(now+i*.07);o.stop(now+.38+i*.07);});
 }
 async function load(){quizzes=(await fetch('/api/quizzes').then(r=>r.json())).quizzes;if(quizzes.length) current=structuredClone(quizzes[0]);updateMusicControls();render();}
 function renderList(){
-  $('#quizList').innerHTML=quizzes.map(q=>`<div class="quiz-item ${q.id===current.id?'active':''}" data-id="${q.id}"><div class="quiz-line"><div><b>${esc(q.title)}</b><div class="muted">${q.questions.length} preguntas</div></div><button class="quiz-delete" data-delete="${q.id}" title="Eliminar cuestionario">✕</button></div></div>`).join('')||'<p class="muted">Aún no hay cuestionarios.</p>';
+  $('#quizList').innerHTML=quizzes.map(q=>`<div class="quiz-item ${q.id===current.id?'active':''}" data-id="${q.id}"><div class="quiz-line"><div><b>${esc(q.title)}</b><div class="muted">${q.questions.length} preguntas</div></div><button class="quiz-delete" data-delete="${q.id}" title="Eliminar cuestionario">Eliminar</button></div></div>`).join('')||'<p class="muted">Aún no hay cuestionarios.</p>';
   document.querySelectorAll('.quiz-item').forEach(e=>e.onclick=ev=>{if(ev.target.closest('.quiz-delete'))return;sync();current=structuredClone(quizzes.find(q=>q.id===e.dataset.id));render();});
   document.querySelectorAll('.quiz-delete').forEach(b=>b.onclick=async ev=>{ev.stopPropagation();const q=quizzes.find(x=>x.id===b.dataset.delete);if(!q)return;if(!confirm(`¿Eliminar el cuestionario "${q.title}"? Esta acción no se puede deshacer.`))return;const r=await fetch(`/api/quizzes/${encodeURIComponent(q.id)}`,{method:'DELETE'});if(!r.ok)return alert('No se pudo eliminar el cuestionario.');quizzes=quizzes.filter(x=>x.id!==q.id);if(current.id===q.id)current=quizzes.length?structuredClone(quizzes[0]):{id:null,title:'Nuevo cuestionario',questions:[]};render();});
 }
@@ -27,7 +27,7 @@ function render(){ $('#title').value=current.title||''; $('#questions').innerHTM
 function bind(){document.querySelectorAll('.qcard').forEach(card=>{card.querySelector('.type').onchange=e=>{sync(); const i=+card.dataset.i; current.questions[i].type=e.target.value; current.questions[i].correct=e.target.value==='multiple'?[]:''; current.questions[i].options=e.target.value==='truefalse'?['Verdadero','Falso']:['','','','']; render();};card.querySelector('.delq').onclick=()=>{sync();current.questions.splice(+card.dataset.i,1);render();};});}
 function sync(){current.title=$('#title').value; document.querySelectorAll('.qcard').forEach(card=>{const i=+card.dataset.i,q=current.questions[i];q.type=card.querySelector('.type').value;q.text=card.querySelector('.text').value;q.duration=Math.max(5,+card.querySelector('.duration').value||20);if(q.type==='text'){q.correct=card.querySelector('.correctText').value.split('|').map(x=>x.trim()).filter(Boolean);}else{q.options=[...card.querySelectorAll('.opt')].map(x=>x.value);const checks=[...card.querySelectorAll('.correct')].filter(x=>x.checked).map(x=>+x.dataset.j);q.correct=q.type==='multiple'?checks:(checks[0]??'');}})}
 $('#musicAdmin').onclick=()=>{musicEnabled=!musicEnabled;localStorage.setItem('giotk-music',musicEnabled?'on':'off');updateMusicControls();if(musicEnabled)previewMusic();};
-$('#volumeAdmin').oninput=e=>{musicVolume=Math.max(.8,Math.min(2.5,Number(e.target.value)/100));localStorage.setItem('giotk-volume',String(musicVolume));$('#volumeValue').textContent=`${Math.round(musicVolume*100)}%`;};
+$('#volumeAdmin').oninput=e=>{musicVolume=Math.max(1,Math.min(4,Number(e.target.value)/100));localStorage.setItem('giotk-volume',String(musicVolume));$('#volumeValue').textContent=`${Math.round(musicVolume*100)}%`;};
 $('#volumeAdmin').onchange=()=>previewMusic();
 $('#addQ').onclick=()=>{sync();current.questions.push({type:'single',text:'',options:['','','',''],correct:'',duration:20});render()};$('#newQuiz').onclick=()=>{sync();current={id:null,title:'Nuevo cuestionario',questions:[]};render()};
 $('#save').onclick=async()=>{sync();if(!current.title.trim())return alert('Ingresa un nombre.');const r=await fetch('/api/quizzes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quiz:current})}).then(r=>r.json());current=r.quiz;const idx=quizzes.findIndex(q=>q.id===current.id);if(idx>=0)quizzes[idx]=structuredClone(current);else quizzes.push(structuredClone(current));render();alert('Cuestionario guardado.');};
