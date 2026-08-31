@@ -59,7 +59,7 @@ function serveFile(res,file){ const normalized=path.normalize(file);if(!normaliz
 const server=http.createServer(async(req,res)=>{
   const u=new URL(req.url,`http://${req.headers.host||'localhost'}`),rawPath=decodeURIComponent(u.pathname),p=rawPath.length>1?rawPath.replace(/\/+$/,''):rawPath;
   try{
-    if(req.method==='GET'&&p==='/health')return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.8.5'});
+    if(req.method==='GET'&&p==='/health')return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.8.7'});
 
     if(req.method==='GET'&&p==='/api/auth/me'){const a=currentAuth(req);if(!a)return sendJson(res,200,{user:null});const user=loadUsers().find(x=>x.id===a.userId);return sendJson(res,200,{user:publicUser(user)});}
     if(req.method==='POST'&&p==='/api/auth/login'){const body=await readJson(req);const email=normalizeEmail(body.email);if(!validEmail(email))return sendJson(res,400,{error:'Ingresa un correo electrónico válido.'});const existing=loadUsers().find(x=>normalizeEmail(x.email)===email);if(existing?.disabled)return sendJson(res,403,{error:'Este usuario está deshabilitado. Contacta a un administrador de Altronics.'});const user=upsertEmailUser(email);const sid=token(24);authSessions.set(sid,{userId:user.id,createdAt:Date.now(),expiresAt:Date.now()+14*24*60*60*1000});setSessionCookie(req,res,sid);return sendJson(res,200,{ok:true,user:publicUser(user)});}
@@ -68,10 +68,41 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='PATCH'&&p.startsWith('/api/users/')){const a=requireUserAdmin(req,res);if(!a)return;const id=p.split('/').pop();if(id===a.user.id)return sendJson(res,409,{error:'No puedes deshabilitar tu propio usuario mientras tienes la sesión iniciada.'});const body=await readJson(req);const users=loadUsers(),u=users.find(x=>x.id===id);if(!u)return sendJson(res,404,{error:'Usuario no encontrado'});u.disabled=!!body.disabled;saveUsers(users);if(u.disabled){for(const [sid,ss] of authSessions){if(ss.userId===id)authSessions.delete(sid);}}return sendJson(res,200,{ok:true,user:publicUser(u)});}
     if(req.method==='DELETE'&&p.startsWith('/api/users/')){const a=requireUserAdmin(req,res);if(!a)return;const id=p.split('/').pop();if(id===a.user.id)return sendJson(res,409,{error:'No puedes eliminar tu propio usuario mientras tienes la sesión iniciada.'});saveUsers(loadUsers().filter(x=>x.id!==id));for(const [sid,ss] of authSessions){if(ss.userId===id)authSessions.delete(sid);}return sendJson(res,200,{ok:true});}
 
-    if(req.method==='GET'&&p==='/api/quizzes'){if(!requireAuth(req,res))return;return sendJson(res,200,{quizzes:loadQuizzes()});}
-    if(req.method==='POST'&&p==='/api/quizzes'){if(!requireAuth(req,res))return;const body=await readJson(req),quizzes=loadQuizzes(),quiz=body.quiz||{};quiz.id=quiz.id||token();quiz.updatedAt=new Date().toISOString();quiz.questions=Array.isArray(quiz.questions)?quiz.questions.map(q=>({...q,id:q.id||token(),duration:Number(q.duration||20)})):[];const idx=quizzes.findIndex(x=>x.id===quiz.id);if(idx>=0)quizzes[idx]=quiz;else quizzes.push(quiz);saveQuizzes(quizzes);return sendJson(res,200,{quiz});}
-    if(req.method==='DELETE'&&p.startsWith('/api/quizzes/')){if(!requireAuth(req,res))return;const id=p.split('/').pop();saveQuizzes(loadQuizzes().filter(q=>q.id!==id));return sendJson(res,200,{ok:true});}
-    if(req.method==='POST'&&p==='/api/sessions'){if(!requireAuth(req,res))return;const body=await readJson(req),quiz=loadQuizzes().find(q=>q.id===body.quizId);if(!quiz)return sendJson(res,404,{error:'Quiz no encontrado'});const code=randomCode(),adminToken=token();sessions.set(code,{code,adminToken,quiz:JSON.parse(JSON.stringify(quiz)),state:'lobby',currentQuestion:-1,players:new Map(),answers:new Map(),createdAt:Date.now()});const base=baseUrl(req);return sendJson(res,200,{code,adminToken,presenterUrl:`${base}/presenter?code=${code}&token=${adminToken}`,joinUrl:`${base}/play?code=${code}`});}
+    if(req.method==='GET'&&p==='/api/quizzes'){
+      const auth=requireAuth(req,res);if(!auth)return;
+      const user=loadUsers().find(x=>x.id===auth.userId);
+      const quizzes=loadQuizzes();
+      const visible=isUserAdmin(user)?quizzes:quizzes.filter(q=>q.ownerUserId===user.id);
+      return sendJson(res,200,{quizzes:visible});
+    }
+    if(req.method==='POST'&&p==='/api/quizzes'){
+      const auth=requireAuth(req,res);if(!auth)return;
+      const user=loadUsers().find(x=>x.id===auth.userId);
+      const body=await readJson(req),quizzes=loadQuizzes(),quiz=body.quiz||{};
+      const existing=quiz.id?quizzes.find(x=>x.id===quiz.id):null;
+      if(existing&&!isUserAdmin(user)&&existing.ownerUserId!==user.id)return sendJson(res,403,{error:'No tienes permiso para modificar este cuestionario'});
+      quiz.id=quiz.id||token();
+      quiz.ownerUserId=existing?.ownerUserId||user.id;
+      quiz.ownerEmail=existing?.ownerEmail||user.email;
+      quiz.createdAt=existing?.createdAt||new Date().toISOString();
+      quiz.updatedAt=new Date().toISOString();
+      quiz.questions=Array.isArray(quiz.questions)?quiz.questions.map(q=>({...q,id:q.id||token(),duration:Number(q.duration||20)})):[];
+      const idx=quizzes.findIndex(x=>x.id===quiz.id);if(idx>=0)quizzes[idx]=quiz;else quizzes.push(quiz);saveQuizzes(quizzes);return sendJson(res,200,{quiz});
+    }
+    if(req.method==='DELETE'&&p.startsWith('/api/quizzes/')){
+      const auth=requireAuth(req,res);if(!auth)return;
+      const user=loadUsers().find(x=>x.id===auth.userId),id=p.split('/').pop(),quizzes=loadQuizzes(),quiz=quizzes.find(q=>q.id===id);
+      if(!quiz)return sendJson(res,404,{error:'Quiz no encontrado'});
+      if(!isUserAdmin(user)&&quiz.ownerUserId!==user.id)return sendJson(res,403,{error:'No tienes permiso para eliminar este cuestionario'});
+      saveQuizzes(quizzes.filter(q=>q.id!==id));return sendJson(res,200,{ok:true});
+    }
+    if(req.method==='POST'&&p==='/api/sessions'){
+      const auth=requireAuth(req,res);if(!auth)return;
+      const user=loadUsers().find(x=>x.id===auth.userId),body=await readJson(req),quiz=loadQuizzes().find(q=>q.id===body.quizId);
+      if(!quiz)return sendJson(res,404,{error:'Quiz no encontrado'});
+      if(!isUserAdmin(user)&&quiz.ownerUserId!==user.id)return sendJson(res,403,{error:'No tienes permiso para usar este cuestionario'});
+      const code=randomCode(),adminToken=token();sessions.set(code,{code,adminToken,quiz:JSON.parse(JSON.stringify(quiz)),state:'lobby',currentQuestion:-1,players:new Map(),answers:new Map(),createdAt:Date.now()});const base=baseUrl(req);return sendJson(res,200,{code,adminToken,presenterUrl:`${base}/presenter?code=${code}&token=${adminToken}`,joinUrl:`${base}/play?code=${code}`});
+    }
     if(req.method==='POST'&&p==='/api/join'){const body=await readJson(req),session=sessions.get(String(body.code||''));if(!session)return sendJson(res,404,{error:'Código no válido'});if(session.players.size>=100)return sendJson(res,409,{error:'La sala alcanzó el máximo de 100 jugadores'});const name=String(body.name||'').trim().slice(0,30);if(!name)return sendJson(res,400,{error:'Ingresa un nombre o apodo'});const id=token();session.players.set(id,{id,name,score:0,joinedAt:Date.now()});broadcast(session.code);return sendJson(res,200,{playerId:id,session:publicSession(session,id)});}
     if(req.method==='POST'&&p==='/api/answer'){const body=await readJson(req),s=sessions.get(String(body.code||''));if(!s||s.state!=='question')return sendJson(res,409,{error:'No hay una pregunta activa'});const player=s.players.get(String(body.playerId||''));if(!player)return sendJson(res,403,{error:'Jugador no válido'});if(s.answers.has(player.id))return sendJson(res,409,{error:'Respuesta ya enviada'});if(Date.now()>s.questionEndsAt){finishQuestion(s);return sendJson(res,409,{error:'Tiempo terminado'});}const q=s.quiz.questions[s.currentQuestion],correct=isCorrect(q,body.answer),elapsedMs=Math.max(0,Date.now()-s.questionStartedAt),durationMs=Math.max(1,(q.duration||20)*1000);let points=0;if(correct)points=Math.max(100,Math.round(1000-700*(elapsedMs/durationMs)));player.score+=points;s.answers.set(player.id,{playerId:player.id,answer:body.answer,correct,elapsedMs,points});broadcast(s.code);return sendJson(res,200,{ok:true,correct:null,points:null});}
     if(req.method==='POST'&&p==='/api/presenter/next'){const b=await readJson(req),s=sessions.get(String(b.code||''));if(!s||s.adminToken!==b.token)return sendJson(res,403,{error:'No autorizado'});if(s.state==='question')return sendJson(res,409,{error:'La pregunta aún está activa'});startQuestion(s);return sendJson(res,200,{session:publicSession(s)});}
@@ -90,4 +121,4 @@ const server=http.createServer(async(req,res)=>{
     return sendJson(res,404,{error:'not found'});
   }catch(e){console.error(e);return sendJson(res,500,{error:'Error interno',detail:String(e.message||e)});}
 });
-server.listen(PORT,HOST,()=>console.log(`G IOTK 1.8.5 activa en http://localhost:${PORT}`));
+server.listen(PORT,HOST,()=>console.log(`G IOTK 1.8.7 activa en http://localhost:${PORT}`));
