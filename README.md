@@ -81,7 +81,7 @@ Los cuestionarios se guardan en `data/quizzes.json`. Las partidas activas se man
 > Importante: este modo registra el correo escrito por el usuario, pero no verifica que la persona sea propietaria de esa dirección. Por lo tanto, la regla `@altronics.cl` es adecuada para control informal/registro, no para seguridad fuerte.
 
 
-## Cambios 1.8.7
+## Cambios 1.8.8
 - Los usuarios con correo @altronics.cl pueden ver, editar, eliminar e iniciar partidas con todos los cuestionarios.
 - Los demás usuarios solo ven y gestionan los cuestionarios que ellos mismos crean.
 - Los cuestionarios nuevos guardan ownerUserId y ownerEmail.

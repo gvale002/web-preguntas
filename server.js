@@ -59,7 +59,7 @@ function serveFile(res,file){ const normalized=path.normalize(file);if(!normaliz
 const server=http.createServer(async(req,res)=>{
   const u=new URL(req.url,`http://${req.headers.host||'localhost'}`),rawPath=decodeURIComponent(u.pathname),p=rawPath.length>1?rawPath.replace(/\/+$/,''):rawPath;
   try{
-    if(req.method==='GET'&&p==='/health')return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.8.7'});
+    if(req.method==='GET'&&p==='/health')return sendJson(res,200,{ok:true,app:'G IOTK',version:'1.8.8'});
 
     if(req.method==='GET'&&p==='/api/auth/me'){const a=currentAuth(req);if(!a)return sendJson(res,200,{user:null});const user=loadUsers().find(x=>x.id===a.userId);return sendJson(res,200,{user:publicUser(user)});}
     if(req.method==='POST'&&p==='/api/auth/login'){const body=await readJson(req);const email=normalizeEmail(body.email);if(!validEmail(email))return sendJson(res,400,{error:'Ingresa un correo electrónico válido.'});const existing=loadUsers().find(x=>normalizeEmail(x.email)===email);if(existing?.disabled)return sendJson(res,403,{error:'Este usuario está deshabilitado. Contacta a un administrador de Altronics.'});const user=upsertEmailUser(email);const sid=token(24);authSessions.set(sid,{userId:user.id,createdAt:Date.now(),expiresAt:Date.now()+14*24*60*60*1000});setSessionCookie(req,res,sid);return sendJson(res,200,{ok:true,user:publicUser(user)});}
@@ -121,4 +121,4 @@ const server=http.createServer(async(req,res)=>{
     return sendJson(res,404,{error:'not found'});
   }catch(e){console.error(e);return sendJson(res,500,{error:'Error interno',detail:String(e.message||e)});}
 });
-server.listen(PORT,HOST,()=>console.log(`G IOTK 1.8.7 activa en http://localhost:${PORT}`));
+server.listen(PORT,HOST,()=>console.log(`G IOTK 1.8.8 activa en http://localhost:${PORT}`));
