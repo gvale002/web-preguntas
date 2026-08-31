@@ -1,6 +1,6 @@
 {
   "name": "g-iotk",
-  "version": "1.9.0",
+  "version": "1.6.0",
   "private": true,
   "description": "G IOTK - Plataforma interactiva de preguntas en vivo para presentaciones",
   "main": "server.js",
